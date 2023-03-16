@@ -3,20 +3,22 @@ import { useState } from 'react';
 //import styling from react-native
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
 
-//set background colors
+//dictionary of color options, where eack key is a color name and each value is a style object
 const backgroundColors = {
   black: { backgroundColor: '#090C08'},
   grey: { backgroundColor: '#474056'},
   blue: { backgroundColor: '#8A95A5'},
   green: { backgroundColor: '#B9C6AE'}
 }
-//
 
+//Start component
 export default class Start extends React.Component  {
   constructor(props) {
     super(props);
+    //initialize component's state with empty name and no selected color
     this.state = { name: '', color: ''};
   }
+  //get individual color options from backgroundColors library
   render() {
     const { black, grey, blue, green } = backgroundColors;
 
@@ -33,6 +35,7 @@ export default class Start extends React.Component  {
         <TextInput
           style={styles.textInput}
           value={this.state.name}
+          //update components state with new name value
           onChangeText={(name) => this.setState({name})}
           placeholder='Type your name here'
           />
@@ -92,6 +95,7 @@ export default class Start extends React.Component  {
         <TouchableOpacity
         style={[styles.textInput, styles.chatBox]}
           onPress={() => 
+            //navigate to chat screen and pass in the user's name and selected color
             this.props.navigation.navigate('Chat', 
             { 
               name: this.state.name,
