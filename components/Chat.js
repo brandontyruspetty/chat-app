@@ -1,21 +1,38 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
-import { GiftedChat } from "react-native-gifted-chat";
+import { GiftedChat, Bubble } from "react-native-gifted-chat";
 
+//adding renderBubble prop to GiftedChat component
+const renderBubble = (props) => {
+  return <Bubble
+    {...props}
+    wrapperStyle={{
+      right: {
+        backgroundColor: "#000"
+      },
+      left: {
+        backgroundColor: "#FFF"
+      }
+    }}
+  /> 
+}
+//Get name and color values from navigation prop
 const Chat = ({ route, navigation }) => {
   const { name, color } = route.params;
   const [messages, setMessages] = useState([]);
+  //function onSend() calls state's setter fuction with a callback function passed into it
   const onSend = (newMessages) => {
     setMessages(previousMessages => 
       GiftedChat.append(previousMessages, newMessages))
   }
 
+  //adding system message and simulated user message with useEffect() function
   useEffect(() => {
     setMessages([
       {
         _id: 1,
-        text: "Hello developer",
+        text: "Hello developer, how is your day going?",
         createdAt: new Date(),
         user: {
           _id: 2,
@@ -25,13 +42,14 @@ const Chat = ({ route, navigation }) => {
       },
       {
         _id: 2,
-        text: 'This is a system message',
+        text: 'You have now entered The Chat',
         createdAt: new Date(),
         system: true,
       },
     ]);
   }, []);
 
+  //Set name and background color values 
   useEffect(() => {
     navigation.setOptions({ title: name, color: color });
   }, []);
@@ -41,12 +59,14 @@ const Chat = ({ route, navigation }) => {
       >
        <GiftedChat
           messages={messages}
+          renderBubble={renderBubble}
           onSend={messages => onSend(messages)}
           user={{
             _id: 1
           }}
         />
         { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
+        { Platform.OS === 'ios' ? <KeyboardAvoidingView behavior="padding" /> : null }
       </View>
    )
  };
