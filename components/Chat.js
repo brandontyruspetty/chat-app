@@ -1,7 +1,8 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, Button } from 'react-native';
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import { collection, getDocs, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 
 //adding renderBubble prop to GiftedChat component
 const renderBubble = (props) => {
@@ -17,57 +18,71 @@ const renderBubble = (props) => {
     }}
   /> 
 }
-//Get name and color values from navigation prop
-const Chat = ({ route, navigation }) => {
-  const { name, color } = route.params;
+
+//define Chat component as default of the module
+export default function Chat({ navigation, route, db }) {
   const [messages, setMessages] = useState([]);
-  //function onSend() calls state's setter fuction with a callback function passed into it
+
+  useEffect(() => {
+    //get name and color values from navigation prop
+    let name = route.params.name;
+    let color = route.params.color;
+
+    //set header background color to color value
+    navigation.setOptions({
+      headerStyle: {
+        backgroundColor: color,
+      },
+    });
+
+    //listen for updates on the messages collection 
+    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedMessages = [];
+      querySnapshot.forEach((doc) => {
+        const fetchedMessage = doc.data();
+        fetchedMessage.createdAt = new Date(
+          fetchedMessage.createdAt.seconds * 1000
+        );
+        fetchedMessages.push(fetchedMessage);
+      });
+      setMessages(fetchedMessages);
+    });
+
+    //clean up listener
+    return () => {
+      unsubscribe();
+    };
+  }, [navigation, route.params.name, route.params.color, db]);
+  
+  //function onSend() adds new message to "messages" collection in Firestore
   const onSend = (newMessages) => {
-    setMessages(previousMessages => 
-      GiftedChat.append(previousMessages, newMessages))
-  }
-
-  //adding system message and simulated user message with useEffect() function
-  useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello developer, how is your day going?",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
+    addDoc(collection(db, "messages"), {
+      ...newMessages[0],
+      createdAt: new Date(),
+      user: {
+        _id: route.params.userID,
+        name: route.params.name,
       },
-      {
-        _id: 2,
-        text: 'You have now entered The Chat',
-        createdAt: new Date(),
-        system: true,
-      },
-    ]);
-  }, []);
-
-  //Set name and background color values 
-  useEffect(() => {
-    navigation.setOptions({ title: name, color: color });
-  }, []);
+    });
+  };
 
     return (
-      <View style={[styles.container, {backgroundColor: color}]}
+      <View style={[styles.container, {backgroundColor: route.params.color }]}
       >
        <GiftedChat
           messages={messages}
           renderBubble={renderBubble}
-          onSend={messages => onSend(messages)}
+          onSend={onSend}
           user={{
-            _id: 1
+            _id: route.params.userID,
+            name: route.params.name,
           }}
         />
         { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
         { Platform.OS === 'ios' ? <KeyboardAvoidingView behavior="padding" /> : null }
-      </View>
+        <Button title="Leave Chat" onPress={() => navigation.navigate("Start")} />
+    </View>
    )
  };
       
@@ -77,4 +92,3 @@ const styles = StyleSheet.create({
  }
 });
 
-export default Chat;
