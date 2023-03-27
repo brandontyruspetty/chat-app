@@ -1,8 +1,9 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, Button } from 'react-native';
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //adding renderBubble prop to GiftedChat component
 const renderBubble = (props) => {
@@ -19,14 +20,24 @@ const renderBubble = (props) => {
   /> 
 }
 
+const renderInputToolbar = (props) => {
+  if (isConnected) return <InputToolbar {...props} />;
+  else return null;
+ }
+
+
 //define Chat component as default of the module
-export default function Chat({ navigation, route, db }) {
+export default function Chat({ navigation, route, db, isConnected }) {
   const [messages, setMessages] = useState([]);
+
+  
+  let unsubMessages;
 
   useEffect(() => {
     //get name and color values from navigation prop
     let name = route.params.name;
     let color = route.params.color;
+    
 
     //set header background color to color value
     navigation.setOptions({
@@ -34,26 +45,46 @@ export default function Chat({ navigation, route, db }) {
         backgroundColor: color,
       },
     });
+    if (isConnected === true) {
+
+      if (unsubMessages) unsubMessages();
+      unsubMessages = null;
 
     //listen for updates on the messages collection 
     const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const fetchedMessages = [];
+    const unsubMessages = onSnapshot(q, (querySnapshot) => {
+      const newMessages = [];
       querySnapshot.forEach((doc) => {
-        const fetchedMessage = doc.data();
-        fetchedMessage.createdAt = new Date(
-          fetchedMessage.createdAt.seconds * 1000
+        const newMessages = doc.data();
+        newMessages.createdAt = new Date(
+          newMessages.createdAt.seconds * 1000
         );
-        fetchedMessages.push(fetchedMessage);
+        newMessages.push(newMessages);
       });
-      setMessages(fetchedMessages);
-    });
+      cacheMessages(newMessages);
+      setMessages(newMessages);
+    })
+  } else loadCachedMessages();
 
     //clean up listener
     return () => {
-      unsubscribe();
+      if (unsubMessages) unsubMessages();
     };
-  }, [navigation, route.params.name, route.params.color, db]);
+  }, [isConnected, navigation, route.params.name, route.params.color, db]);
+  
+
+  const loadCachedMessages = async () => {
+    const cachedMessages = await AsyncStorage.getItem("chat_app") || [];
+    setMessages(JSON.parse(cachedMessages));
+  }
+
+  const cacheMessages = async (messagesToCache) => {
+    try {
+        await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
+    } catch (error) {
+        console.log(error.message);
+    };
+}
   
   //function onSend() adds new message to "messages" collection in Firestore
   const onSend = (newMessages) => {
