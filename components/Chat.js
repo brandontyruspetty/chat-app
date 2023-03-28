@@ -20,16 +20,16 @@ const renderBubble = (props) => {
   /> 
 }
 
-const renderInputToolbar = (props) => {
-  if (isConnected) return <InputToolbar {...props} />;
-  else return null;
- }
 
 
 //define Chat component as default of the module
-export default function Chat({ navigation, route, db, isConnected }) {
+export default function Chat({ navigation, route, db, isConnected, storage }) {
   const [messages, setMessages] = useState([]);
 
+  const renderInputToolbar = (props) => {
+    if (isConnected === true) return <InputToolbar {...props} />;
+    else return null;
+   }
   
   let unsubMessages;
 
@@ -52,14 +52,17 @@ export default function Chat({ navigation, route, db, isConnected }) {
 
     //listen for updates on the messages collection 
     const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-    const unsubMessages = onSnapshot(q, (querySnapshot) => {
-      const newMessages = [];
-      querySnapshot.forEach((doc) => {
-        const newMessages = doc.data();
-        newMessages.createdAt = new Date(
-          newMessages.createdAt.seconds * 1000
-        );
-        newMessages.push(newMessages);
+     unsubMessages = onSnapshot(q, (docs) => {
+      let newMessages = [];
+      docs.forEach(doc => {
+         newMessages.push({
+          id: doc.id,
+          text: doc.text,
+          image: doc.image, 
+          location: doc.location, 
+          ...doc.data(),
+          createdAt: new Date(doc.data().createdAt.toMillis()),
+         })
       });
       cacheMessages(newMessages);
       setMessages(newMessages);
@@ -104,6 +107,7 @@ export default function Chat({ navigation, route, db, isConnected }) {
        <GiftedChat
           messages={messages}
           renderBubble={renderBubble}
+          renderInputToolbar={renderInputToolbar}
           onSend={onSend}
           user={{
             _id: route.params.userID,
