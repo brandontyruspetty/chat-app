@@ -83,7 +83,7 @@ export default function Chat({ navigation, route, db, isConnected, storage }) {
 
   const cacheMessages = async (messagesToCache) => {
     try {
-        await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
+        await AsyncStorage.setItem("chat_app", JSON.stringify(messagesToCache));
     } catch (error) {
         console.log(error.message);
     };
