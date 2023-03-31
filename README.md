@@ -9,6 +9,7 @@ The app provides users with a chat interface and includes options to share image
 + React Native
 - Expo
 * JavaScript
++ Google Firestore Database
 
 ### **User Stories**
 + As a new user, I want to be able to easily enter a chat room so I can quickly start talking to my friends and family.
@@ -23,3 +24,10 @@ The app provides users with a chat interface and includes options to share image
 - A page displaying the conversation, as well as an input field and submit button.
 * The chat must provide users with two additional communication features: sending images and location data.
 + Data gets stored online and offline.
+
+### Getting Started
+To install packages: refer to package.json file
+
+To run project, execute the command: npm start 
+
+Run tests in either Android Emulator via Android Studio or iOS simulator via Xcode
