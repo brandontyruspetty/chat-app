@@ -7,9 +7,11 @@ The app provides users with a chat interface and includes options to share image
 
 ### **Tech Stack**
 + React Native
+- React Native Gifted Chat
 - Expo
 * JavaScript
 + Google Firestore Database
+
 
 ### **User Stories**
 + As a new user, I want to be able to easily enter a chat room so I can quickly start talking to my friends and family.
@@ -25,9 +27,39 @@ The app provides users with a chat interface and includes options to share image
 * The chat must provide users with two additional communication features: sending images and location data.
 + Data gets stored online and offline.
 
-### Getting Started
-To install packages: refer to package.json file
+### Getting Started With Develpment Environment
++ Install Expo CLI: `npm install expo-cli -g` and login with an Expo account: `expo login`
++ Install necessary dependencies: `npm i`
+* Install Expo Go App from Apple App Store or Google Play Store to test project on mobile device
++ Install Android Studio for Android Emulator or Xcode for iOS Simulator to test app
 
-To run project, execute the command: npm start 
+### Setting Up Database
++ Sign in at Google Firebase
+- Create new project in test mode
+* Create a Firestore Database
+* In 'Settings-> General-> Your Apps-> Firestore for Web' generate your configuration object
++ In the App.js file replace the `firebaseconfig` variable with the configuration info from your own Firestore database
 
-Run tests in either Android Emulator via Android Studio or iOS simulator via Xcode
+### Run the Project
+- Start app by running `npx expo start` or `expo start`
++ Using the Expo Go app start Chat-App by scanning QR code in terminal with your mobile device
+* Using the Emulator/Simulator press `a` for Android or `i` for iOS
+
+### Dependencies
+```
+    "@react-navigation/native": "^6.1.6",
+    "@react-navigation/native-stack": "^6.9.12",
+    "expo": "~48.0.6",
+    "expo-status-bar": "~1.4.4",
+    "firebase": "^9.13.0",
+    "react": "18.2.0",
+    "react-native": "0.71.4",
+    "react-native-gifted-chat": "^2.0.0",
+    "react-native-safe-area-context": "4.5.0",
+    "react-native-screens": "~3.20.0",
+    "@react-native-community/netinfo": "9.3.7",
+    "@react-native-async-storage/async-storage": "1.17.11",
+    "expo-image-picker": "~14.1.1",
+    "expo-location": "~15.1.1",
+    "react-native-maps": "1.3.2"
+ 
